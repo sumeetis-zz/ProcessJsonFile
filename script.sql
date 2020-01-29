@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 29, 2020 at 02:16 AM
+-- Generation Time: Jan 29, 2020 at 04:11 AM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.2.26
 
@@ -35,6 +35,10 @@ CREATE TABLE `customer_table` (
   `last_name` varchar(100) DEFAULT NULL,
   `email` varchar(100) DEFAULT NULL,
   `phone` varchar(15) DEFAULT NULL,
+  `street` varchar(250) DEFAULT NULL,
+  `postcode` varchar(100) DEFAULT NULL,
+  `suburb` varchar(100) DEFAULT NULL,
+  `state` varchar(20) DEFAULT NULL,
   `created_ts` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -46,7 +50,6 @@ CREATE TABLE `customer_table` (
 
 CREATE TABLE `items_table` (
   `items_table_id` int(11) NOT NULL,
-  `item_id` int(11) DEFAULT NULL,
   `order_id` int(11) DEFAULT NULL,
   `item_count` int(11) DEFAULT NULL,
   `quantity` int(11) DEFAULT NULL,
@@ -65,7 +68,8 @@ CREATE TABLE `items_table` (
   `gtin14` varchar(50) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `brand_id` int(11) DEFAULT NULL,
-  `brand_name` varchar(250) DEFAULT NULL
+  `brand_name` varchar(250) DEFAULT NULL,
+  `created_ts` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -86,22 +90,6 @@ CREATE TABLE `order_table` (
   `created_ts` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
--- --------------------------------------------------------
-
---
--- Table structure for table `shipping_address`
---
-
-CREATE TABLE `shipping_address` (
-  `shipping_address_id` int(11) NOT NULL,
-  `customer_id` int(11) DEFAULT NULL,
-  `street` varchar(250) DEFAULT NULL,
-  `postcode` varchar(100) DEFAULT NULL,
-  `suburb` varchar(100) DEFAULT NULL,
-  `state` varchar(20) DEFAULT NULL,
-  `created_ts` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 --
 -- Indexes for dumped tables
 --
@@ -117,8 +105,7 @@ ALTER TABLE `customer_table`
 -- Indexes for table `items_table`
 --
 ALTER TABLE `items_table`
-  ADD PRIMARY KEY (`items_table_id`),
-  ADD KEY `order_idfk` (`item_id`);
+  ADD PRIMARY KEY (`items_table_id`);
 
 --
 -- Indexes for table `order_table`
@@ -126,12 +113,6 @@ ALTER TABLE `items_table`
 ALTER TABLE `order_table`
   ADD PRIMARY KEY (`order_table_id`),
   ADD KEY `customer_idfk` (`order_id`);
-
---
--- Indexes for table `shipping_address`
---
-ALTER TABLE `shipping_address`
-  ADD KEY `customer_idfk` (`shipping_address_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -154,12 +135,6 @@ ALTER TABLE `items_table`
 --
 ALTER TABLE `order_table`
   MODIFY `order_table_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `shipping_address`
---
-ALTER TABLE `shipping_address`
-  MODIFY `shipping_address_id` int(11) NOT NULL AUTO_INCREMENT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
