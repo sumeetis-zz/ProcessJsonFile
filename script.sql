@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 29, 2020 at 04:11 AM
+-- Generation Time: Jan 29, 2020 at 03:50 PM
 -- Server version: 10.4.11-MariaDB
 -- PHP Version: 7.2.26
 
@@ -88,6 +88,22 @@ CREATE TABLE `order_table` (
   `discounts_priority` tinyint(4) DEFAULT 0,
   `shipping_price` decimal(10,0) DEFAULT NULL,
   `created_ts` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `summary`
+--
+
+CREATE TABLE `summary` (
+  `order_id` int(11) DEFAULT NULL,
+  `order_datetime` varchar(150) DEFAULT NULL,
+  `total_order_value` int(11) DEFAULT NULL,
+  `average_unit_price` int(11) DEFAULT NULL,
+  `distinct_unit_count` int(11) DEFAULT NULL,
+  `total_units_count` int(11) DEFAULT NULL,
+  `customer_state` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

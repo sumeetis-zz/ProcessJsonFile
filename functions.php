@@ -30,6 +30,7 @@ function extractJsonData($url)
 	// decoding the final json
 	$jsondata = json_decode($jsondata, true); // decode the JSON feed
 	//var_dump($jsondata); 
+	echo "Step 1 : successfully extrated json!";
 	return $jsondata;
 }
 
@@ -37,7 +38,7 @@ function extractJsonData($url)
 function processOrdersData($jsondata)
 {
 
-	echo "count" . count($jsondata['orders']);
+	echo "No of records found in Json: " . count($jsondata['orders']);
 	//var_dump($jsondata); 
 
 
@@ -101,7 +102,10 @@ function processOrdersData($jsondata)
 		
     			}
 
+		createSummary($jsondata['orders'][$x]['order_id']);
 			}
+
+			echo "Step 2 : successfully stored data in database!";
 
 }
 
@@ -125,7 +129,7 @@ try {
     $sql->bindValue('DISCOUNTS_PRIORITY',  $discountpriority);
     $sql->bindValue('ORDER_SHIPPING_PRICE', $shippingprice);   
         $sql->execute();
-       echo "<br/>ORDER data inserted.";
+       // echo "<br/>ORDER data inserted.";
         // echo $DBH1->lastInsertId();
    }catch (PDOException $e)
    {
@@ -157,7 +161,7 @@ function insertCustomer($customerid, $firstname, $lastname, $email, $phone, $str
        // echo "<BR>" .$queryString;
         $sql->execute();
 
-      echo "<br/>CUSTOMER data inserted.";
+      // echo "<br/>CUSTOMER data inserted.";
 
    }catch (PDOException $e)
    {
@@ -202,7 +206,7 @@ function insertItems($orderid, $itemid, $quantity, $unitprice, $productid, $titl
        // echo "<BR>" .$queryString;
         $sql->execute();
 
-      echo "<br/>ITEMS data inserted.";
+      // echo "<br/>ITEMS data inserted.";
 
    }catch (PDOException $e)
    {
@@ -211,22 +215,101 @@ function insertItems($orderid, $itemid, $quantity, $unitprice, $productid, $titl
 
 }
 
-function createOutputSummary()
+function createSummary($orderid)
 {
-	//$fp = fopen('out.csv', 'w');
-	//
-	//foreach ($jsondata as $fields) {
-	//    fputcsv($fp, $fields);
-	//}
-	//
-	//fclose($fp);
-	//echo "done";
-	//
-	//$json_filename = 'data.json';
-	//$csv_filename = 'data.csv';
-	//jsonToCSV($json_filename, $csv_filename);
-	//echo 'Successfully converted json to csv file. <a href="' . $csv_filename . '" target="_blank">Click here to open it.</a>';
+	$DBH = dbConnection();
+	$queryString = "insert into summary (order_id,order_datetime,total_order_value,average_unit_price,distinct_unit_count,total_units_count,customer_state)
+	select orders.order_id, orders.order_datetime, 
+	(SELECT SUM(unit_price) total FROM items_table where order_id = " . $orderid. ") get_total_order_value, 
+	(SELECT round(sum(quantity*unit_price)/sum(quantity),0) FROM items_table where order_id = " . $orderid. ") get_average_unit_price,
+	(SELECT count(item_count) FROM items_table where order_id = " . $orderid. ") get_distinct_unit_value,
+	(select sum(quantity) from items_table where order_id = " . $orderid. ") get_totals_units_count,
+	customers.state 
+	from order_table orders 
+	inner join items_table items on items.order_id = orders.order_id 
+	inner join customer_table customers on customers.customer_id = orders.customer_id
+	where orders.order_id = " . $orderid ."
+	group by orders.order_id ";
+
+	$sql=$DBH->prepare($queryString);
+   
+ 
+ try {    
+       //echo "<BR>" .$queryString;
+         $sql->execute();
+		
+     //  echo "<br/>create output summary.";
+
+   }catch (PDOException $e)
+   {
+   	echo $e;
+   }
+
 }
+
+
+function createOutputfile()
+{
+	$DBH = dbConnection();
+	$queryString = "select order_id,order_datetime,total_order_value,average_unit_price,distinct_unit_count,total_units_count,customer_state from summary where total_order_value > 0 ";
+	 $sql=$DBH->prepare($queryString);
+   
+   try {    
+            $sql->execute();
+            exportCSVStream($sql);
+
+   }catch (PDOException $e)
+   {
+   	echo $e;
+   }
+
+   echo "Step 3 : out.csv file created [Task completed]!";
+
+}
+
+
+function exportCSVStream($sql)   
+{
+    $data = "";
+    $i=0;
+    $titleline = "";
+    $rowdata = "";
+    while($line=$sql->fetch(PDO::FETCH_ASSOC))//will run for all results
+    {
+        if ($i==0)
+        {
+                foreach($line as $k=>$v)
+                {
+                    if (strpos($k,'__') !== false)
+                    {
+                        $new_key=str_replace('__','_',$k);
+                    }
+                    else //replaces '_' with a space ' '
+                    {
+                        $new_key=str_replace('_',' ',$k);
+                    }
+                    $new_key=str_replace('*#*','',$new_key);
+                    $titleline.="\"$new_key\",";
+                }
+                $titleline = substr($titleline,0,-1);
+                $data = $titleline."\r\n";
+                $i+=1;
+        } 
+        foreach($line as $k=>$v)
+        {
+            $escaped_val = str_replace("\"", "'",$v);
+            $escaped_val = addcslashes($escaped_val, '"');
+                $rowdata.="\"$escaped_val\",";
+        }
+        $rowdata = substr($rowdata,0,-1);
+        $data .= $rowdata."\r\n";
+        $rowdata = "";
+    }
+
+    header ("Content-disposition: attachment; filename=out.csv");
+    echo $data; //the string that is the file
+}
+
 
 
 ?>

@@ -23,7 +23,7 @@ try {
 $query = file_get_contents("script.sql");
 $stmt = $DBH->prepare($query);
 if ($stmt->execute())
-     echo "Successfully database created <br><br>";
+     echo "Database catch created successfully! <br><br>";
 else 
      echo "Failed to create database<br>";
 
@@ -44,7 +44,7 @@ else
 
 
 // [Step3: create output file ] #######################
-	createOutputSummary();
+	createOutputfile();
 
 // [---------- MAIN EXECUTION: end here  ------------------------]
 
