@@ -9,11 +9,26 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-$DBH=new PDO("mysql:host=localhost;dbname=catch","root","");//test
-$DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
 
+function dbConnection(){
+   $dbhost = 'localhost';
+   $dbuser = 'root';
+   $dbpass = '';
+   $dbname = 'catch';
+
+   try {
+     $db = new PDO("mysql:host=$dbhost;dbname=$dbname;charset=UTF8", $dbuser, $dbpass);
+     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+     return $db;
+   } catch (PDOException $e){
+     echo 'Connection failed: ' . $e->getMessage();
+   }
+}
+
+
+// $db= dbConnection();
 // $strSql="select count(*) from order_table where 1= 1;";
-//     $sql=$DBH->prepare($strSql);
+//     $sql=$db->prepare($strSql);
 //     echo $sql->execute();
 //     echo "count";
 
